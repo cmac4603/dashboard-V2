@@ -1,0 +1,16 @@
+[package]
+name = "fastly-template-rust-default"
+version = "0.1.0"
+authors = []
+edition = "2018"
+
+[profile.release]
+debug = true
+
+[dependencies]
+anyhow = "1.0.33"
+fastly = "^0.5.0"
+# http_guest = { git = "https://github.com/fastly/terrarium-rust-guest" }
+horrorshow = "0.8.3"
+serde = { version = "1.0.59", features = ["derive"] }
+serde_json = "1.0.59"

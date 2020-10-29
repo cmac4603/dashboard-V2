@@ -1,0 +1,34 @@
+[
+    {
+        "avg_bytes": 106.0,
+        "avg_response_time": 541.3048530416955,
+        "avg_throughput": 19.18688524590164,
+        "duration": "305",
+        "errors_count": 100.0,
+        "name": "test-1597307460",
+        "ninety_line": 1.036,
+        "threshold_criteria": [
+            "avg_response_time < 100",
+            "errors_count < 2",
+            "avg_throughput > 10"
+        ],
+        "threshold_results": [
+            {
+                "field": "avg_response_time",
+                "success": false,
+                "value": 541.3048530416955
+            },
+            {
+                "field": "errors_count",
+                "success": false,
+                "value": 100.0
+            },
+            {
+                "field": "avg_throughput",
+                "success": true,
+                "value": 19.18688524590164
+            }
+        ],
+        "version_tag": "main"
+    }
+]

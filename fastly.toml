@@ -1,0 +1,6 @@
+version = 8
+name = "loadtesting-beta-dashboard"
+description = "Loadtesting Beta Dashboard"
+authors = ["colin.macrae+compute@mediaos.email"]
+language = "rust"
+service_id = "7Wcb84n7TYYyIVRO8qE3YW"
