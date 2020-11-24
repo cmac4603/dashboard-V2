@@ -1,6 +1,6 @@
 [package]
-name = "fastly-template-rust-default"
-version = "0.1.0"
+name = "loadtesting-beta-dashboard"
+version = "0.2.0"
 authors = []
 edition = "2018"
 
@@ -9,8 +9,13 @@ debug = true
 
 [dependencies]
 anyhow = "1.0.33"
+# burden_shared = { git = "ssh://git@github.com/Hearst-Hatchery/burden", package = "shared" }
+burden_shared = { path = "../../../hearstrepos/burden/shared", package = "shared", default-features = false, features = ["fastly-edge"] }
 fastly = "^0.5.0"
-# http_guest = { git = "https://github.com/fastly/terrarium-rust-guest" }
 horrorshow = "0.8.3"
+http = "0.2.1"
+lazy_static = "1.4.0"
+regex = "1.4.2"
 serde = { version = "1.0.59", features = ["derive"] }
 serde_json = "1.0.59"
+tera = "1.5.0"

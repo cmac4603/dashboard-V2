@@ -1,13 +1,17 @@
 // use std::error::Error;
 
 use anyhow::{Error, Result};
+use burden_shared::dynamo_db::constructor::{LoadtestResult as BurdenLoadtestResult, ThresholdResult};
+use burden_shared::error::BurdenError;
 use fastly::dictionary::Dictionary;
 use fastly::{Body, PendingRequest, Response, Request, RequestExt};
+use http::status::StatusCode;
 use serde::{Deserialize, Serialize};
 use serde_json::Error as JsonError;
 
 // https://loadtesting.hearstapps.com/loadtests/5-minute-burden/results/1598637064
 // https://burden.kubeprod.hearstapps.com/v2/loadtests/5-minute-jam/results/1597307460
+// https://hmm-loadtesting-beta.edgecompute.app/loadtests/5-minute-burden/results/1598637064
 
 pub(crate) struct BurdenRequest {
     loadtest_name: String,
@@ -27,7 +31,6 @@ impl BurdenRequest {
                 loadtest_name, running_id
             )).body(vec![])?;
 
-        // Send it asynchronously:
         let pending = req.send_async("burden_kubeprod").map_err(Error::msg)?;
         Ok(BurdenRequest {
             loadtest_name: loadtest_name.to_string(),
@@ -36,42 +39,20 @@ impl BurdenRequest {
         })
     }
 
+
     pub(crate) fn get_response(self) -> Result<BurdenLoadtestResult> {
-        let resp = self.pending.wait().map_err(Error::msg)?;
-        if resp.status() == 200 {
-            BurdenLoadtestResult::new(resp)
-        } else {
-            let err_body = std::str::from_utf8(resp.into_body().into_bytes().as_ref())?;
-            Err(anyhow!("Error retrieving loadtest result from burden"))
+        // TODO: sort this rubbish out
+        fn map_this_err(x: BurdenError) -> Error {
+            anyhow!(x.to_string())
         }
-    }
-}
-
-#[derive(Clone, Deserialize)]
-pub(crate) struct BurdenLoadtestResult {
-    pub(crate) avg_bytes: f64,
-    pub(crate) avg_response_time: f64,
-    pub(crate) avg_throughput: f64,
-    pub(crate) duration: String, // grr
-    pub(crate) errors_count: f64,
-    pub(crate) name: String, // format: {loadtest_name}-{running_id}
-    pub(crate) ninety_line: f64,
-    pub(crate) threshold_criteria: Vec<String>,
-    pub(crate) threshold_results: Vec<ThresholdResult>,
-    pub(crate) version_tag: String,
-}
-
-#[derive(Clone, Deserialize)]
-pub(crate) struct ThresholdResult {
-    pub(crate) field: String,
-    pub(crate) success: bool,
-    pub(crate) value: f64,
-}
-
-impl BurdenLoadtestResult {
-    pub(crate) fn new(response: Response<Body>) -> Result<Self> {
-        let json: Vec<BurdenLoadtestResult> = serde_json::from_slice(response.into_body().into_bytes().as_ref())?;
-        let result = json[0].clone();
-        Ok(result)
+        let resp = self.pending.wait().map_err(Error::msg)?;
+        match resp.status() {
+            StatusCode::OK => BurdenLoadtestResult::new(resp).map_err(map_this_err),
+            StatusCode::NO_CONTENT => Ok(BurdenLoadtestResult::default()),  // test may not yet be finished
+            _ => {
+                let bytes = resp.into_body().into_bytes().clone();
+                Err(anyhow!("Error retrieving loadtest result from burden: {}", std::str::from_utf8(bytes.as_ref())?))
+            }
+        }
     }
 }

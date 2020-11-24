@@ -1,4 +1,4 @@
-version = 8
+version = 17
 name = "loadtesting-beta-dashboard"
 description = "Loadtesting Beta Dashboard"
 authors = ["colin.macrae+compute@mediaos.email"]

@@ -3,3 +3,6 @@ rustflags = ["-C", "debuginfo=2"]
 
 [build]
 target = "wasm32-wasi"
+
+[net]
+git-fetch-with-cli = true
